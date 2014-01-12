@@ -1,3 +1,9 @@
+#-*- coding: utf-8 -*-
+
+# Copyright 2014, pocket
+# Licensed MIT
+# http://opensource.org/licenses/mit-license.php
+
 module MikuTwitter::APIShortcuts
   def blocked_ids
     cursor_pager(self/'blocks/ids', :json, :ids, {})
