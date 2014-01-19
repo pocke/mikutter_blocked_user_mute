@@ -15,7 +15,7 @@ Plugin.create(:blocked_user_mute) do
 
   def get_block_list
     Service.primary.twitter.blocked_ids.next do |x|
-      UserConfig[:blocked_user_mute_list] = x
+      UserConfig[:blocked_user_mute_list] = x.sort
     end
     Reserver.new(3600){get_block_list}
   end
@@ -24,9 +24,9 @@ Plugin.create(:blocked_user_mute) do
 
   filter_show_filter do |msgs|
     msgs = msgs.reject do |msg|
-      UserConfig[:blocked_user_mute_list].include?(
-        msg.retweet? ? msg.retweet_source[:user].id : msg.user.id
-      )
+      UserConfig[:blocked_user_mute_list].bsearch do |x|
+        x <=> (msg.retweet? ? msg.retweet_source[:user].id : msg.user.id)
+      end
     end
     [msgs]
   end
