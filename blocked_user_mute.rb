@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-# Copyright 2014, pocket
+# Copyright 2014, pocke
 # Licensed MIT
 # http://opensource.org/licenses/mit-license.php
 
@@ -24,11 +24,9 @@ Plugin.create(:blocked_user_mute) do
 
   filter_show_filter do |msgs|
     msgs = msgs.reject do |msg|
-      if msg.retweet? then
-        UserConfig[:blocked_user_mute_list].include?(msg.retweet_source[:user].id)
-      else
-        UserConfig[:blocked_user_mute_list].include?(msg.user.id)
-      end
+      UserConfig[:blocked_user_mute_list].include?(
+        msg.retweet? ? msg.retweet_source[:user].id : msg.user.id
+      )
     end
     [msgs]
   end
