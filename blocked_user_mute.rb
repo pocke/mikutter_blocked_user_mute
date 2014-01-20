@@ -4,6 +4,8 @@
 # Licensed MIT
 # http://opensource.org/licenses/mit-license.php
 
+require 'bsearch'
+
 module MikuTwitter::APIShortcuts
   def blocked_ids
     cursor_pager(self/'blocks/ids', :json, :ids, {})
