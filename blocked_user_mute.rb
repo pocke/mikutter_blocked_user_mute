@@ -11,26 +11,46 @@ module MikuTwitter::APIShortcuts
   end
 end
 
-Plugin.create(:blocked_user_mute) do
-  UserConfig[:blocked_user_mute_list] ||= []
 
-  def get_block_list
-    Service.primary.twitter.blocked_ids.next do |x|
-      UserConfig[:blocked_user_mute_list] = x.sort
-    end
-    Reserver.new(3600){get_block_list}
+class BlockedUserMuter
+  def initialize
+    @user_list = []
+    update
   end
 
-  get_block_list
+  def update
+    Service.primary.twitter.blocked_ids.next do |x|
+      @user_list = x.sort
+    end
+  end
+
+  def target?(id)
+    i = @user_list.bsearch do |x|
+      x >= id
+    end
+
+    return i == id
+  end
+end
+
+
+
+Plugin.create(:blocked_user_mute) do
+  muter = BlockedUserMuter.new
+
+  -> {
+    updater = -> {
+      muter.update
+      Reserver.new(3600){updater.call}
+    }
+    updater.call
+  }.call
 
   filter_show_filter do |msgs|
     msgs = msgs.reject do |msg|
       id = msg.retweet? ? msg.retweet_source[:user].id : msg.user.id
-      i = UserConfig[:blocked_user_mute_list].bsearch do |x|
-        x >= id
-      end
-      
-      i == id
+
+      muter.target?(id)
     end
     [msgs]
   end
