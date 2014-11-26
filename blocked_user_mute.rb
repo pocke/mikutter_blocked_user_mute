@@ -4,7 +4,6 @@
 # Licensed MIT
 # http://opensource.org/licenses/mit-license.php
 
-require 'bsearch'
 
 module MikuTwitter::APIShortcuts
   def blocked_ids
@@ -26,9 +25,12 @@ Plugin.create(:blocked_user_mute) do
 
   filter_show_filter do |msgs|
     msgs = msgs.reject do |msg|
-      UserConfig[:blocked_user_mute_list].bsearch do |x|
-        x <=> (msg.retweet? ? msg.retweet_source[:user].id : msg.user.id)
+      id = msg.retweet? ? msg.retweet_source[:user].id : msg.user.id
+      i = UserConfig[:blocked_user_mute_list].bsearch do |x|
+        x >= id
       end
+      
+      i == id
     end
     [msgs]
   end
