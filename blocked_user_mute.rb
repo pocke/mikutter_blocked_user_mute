@@ -4,6 +4,8 @@
 # Licensed MIT
 # http://opensource.org/licenses/mit-license.php
 
+require 'set'
+
 
 module MikuTwitter::APIShortcuts
   def blocked_ids
@@ -20,16 +22,12 @@ class BlockedUserMuter
 
   def update
     Service.primary.twitter.blocked_ids.next do |x|
-      @user_list = x.sort
+      @user_list = x.to_set
     end
   end
 
   def target?(id)
-    i = @user_list.bsearch do |x|
-      x >= id
-    end
-
-    return i == id
+    return @user_list.include?(id)
   end
 end
 
