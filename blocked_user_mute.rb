@@ -29,8 +29,18 @@ class BlockedUserMuter
   def target?(id)
     return @user_list.include?(id)
   end
+
+  def add(target_id)
+    @user_list.add(target_id)
+  end
 end
 
+
+Plugin::Streaming::Streamer.defevent(:block) do |json|
+  source = MikuTwitter::ApiCallSupport::Request::Parser.user(json['source'].symbolize)
+  target = MikuTwitter::ApiCallSupport::Request::Parser.user(json['target'].symbolize)
+  Plugin.call(:block, source, target)
+end
 
 
 Plugin.create(:blocked_user_mute) do
@@ -51,5 +61,9 @@ Plugin.create(:blocked_user_mute) do
       muter.target?(id)
     end
     [msgs]
+  end
+
+  on_block do |source, target|
+    muter.add(target.id)
   end
 end
