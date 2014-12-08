@@ -65,5 +65,7 @@ Plugin.create(:blocked_user_mute) do
 
   on_block do |source, target|
     muter.add(target.id)
+    # hide tweet.
+    Plugin.call(:destroyed, ObjectSpace.each_object(Message).to_a.select{|m| m.user == target})
   end
 end
