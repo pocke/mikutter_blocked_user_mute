@@ -16,7 +16,7 @@ end
 
 class BlockedUserMuter
   def initialize
-    @user_list = []
+    @user_list = Set.new
     update
   end
 
