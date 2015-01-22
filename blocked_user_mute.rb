@@ -16,22 +16,29 @@ end
 
 class BlockedUserMuter
   def initialize
+    @mu = Mutex.new
     @user_list = Set.new
     update
   end
 
   def update
     Service.primary.twitter.blocked_ids.next do |x|
-      @user_list = x.to_set
+      @mu.synchronize do
+        @user_list = x.to_set
+      end
     end
   end
 
   def target?(id)
-    return @user_list.include?(id)
+    return @mu.synchronize do
+      @user_list.include?(id)
+    end
   end
 
   def add(target_id)
-    @user_list.add(target_id)
+    @mu.synchronize do
+      @user_list.add(target_id)
+    end
   end
 end
 
